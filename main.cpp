@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
     }
 
     //UNCOMMENT if you want to print the data array
-/*     cerr << "data: " << endl;
+    /*     cerr << "data: " << endl;
         for (unsigned int i = 0; i < rows; i++)
     {
         for (unsigned int j = 0; j < cols; j++)
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
     cerr << endl; */
 
     // tell omp how many threads to use
-    //omp_set_num_threads(numThreads);
+    omp_set_num_threads(numThreads);
 
     stopwatch S1;
     S1.start();
@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
     ///////////////         Make it parallel!	 ////////////////////
     /////////////////////////////////////////////////////////////////////
 
+#pragma omp parallel {
     double avg = 0;
     double largest = 0;
     int largestI = 0;
@@ -256,15 +257,16 @@ int main(int argc, char *argv[])
             }
         }
     }
+}
 
-    /* cerr << "Corners counted: " << cornerCount << endl;
+/* cerr << "Corners counted: " << cornerCount << endl;
     cerr << "Edges counted: " << edgeCount << endl;
     cerr << "Interior counted: " << interiorCount << endl; */
 
-    S1.stop();
+S1.stop();
 
-    // print out the max value here
-    cerr << "Largest avg is: " << largest << endl
-         << "found at (" << largestI << ", " << largestJ << ")" << endl;
-    cerr << "elapsed time: " << S1.getTime() << endl;
+// print out the max value here
+cerr << "Largest avg is: " << largest << endl
+     << "found at (" << largestI << ", " << largestJ << ")" << endl;
+cerr << "elapsed time: " << S1.getTime() << endl;
 }
