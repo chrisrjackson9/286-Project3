@@ -180,80 +180,69 @@ int main(int argc, char *argv[])
     ///////////////         Make it parallel!	 ////////////////////
     /////////////////////////////////////////////////////////////////////
 
-#pragma omp parallel {
     double avg = 0;
     double largest = 0;
     int largestI = 0;
     int largestJ = 0;
-    int cornerCount = 0;
-    int edgeCount = 0;
-    int interiorCount = 0;
 
-    for (unsigned int i = 0; i < rows; i++)
-    {
-        for (unsigned int j = 0; j < cols; j++)
+#pragma omp parallel for {
+        for (unsigned int i = 0; i < rows; i++)
         {
-            //Interior Averages
-            if (i != 0 && j != 0 && i != (rows - 1) && j != (cols - 1))
+            for (unsigned int j = 0; j < cols; j++)
             {
-                avg = (data[i][j] + data[i - 1][j - 1] + data[i - 1][j] + data[i - 1][j + 1] + data[i][j - 1] + data[i][j + 1] + data[i + 1][j - 1] + data[i + 1][j] + data[i + 1][j + 1]) / 9.0;
-                interiorCount++;
-            }
-            //Corner Averages
-            else if ((i == 0 && (j == 0 || j == (cols - 1))) || (i == (rows - 1) && (j == 0 || j == (cols - 1))))
-            {
+                //Interior Averages
+                if (i != 0 && j != 0 && i != (rows - 1) && j != (cols - 1))
+                {
+                    avg = (data[i][j] + data[i - 1][j - 1] + data[i - 1][j] + data[i - 1][j + 1] + data[i][j - 1] + data[i][j + 1] + data[i + 1][j - 1] + data[i + 1][j] + data[i + 1][j + 1]) / 9.0;
+                }
+                //Corner Averages
+                else if ((i == 0 && (j == 0 || j == (cols - 1))) || (i == (rows - 1) && (j == 0 || j == (cols - 1))))
+                {
 
-                if (i == 0 && j == 0)
-                {
-                    avg = (data[i][j] + data[i + 1][j] + data[i][j + 1] + data[i + 1][j + 1]) / 4.0;
-                    cornerCount++;
+                    if (i == 0 && j == 0)
+                    {
+                        avg = (data[i][j] + data[i + 1][j] + data[i][j + 1] + data[i + 1][j + 1]) / 4.0;
+                    }
+                    else if (i == 0 && j == (cols - 1))
+                    {
+                        avg = (data[i][j] + data[i + 1][j] + data[i][j - 1] + data[i + 1][j - 1]) / 4.0;
+                    }
+                    else if (i == (rows - 1) && j == 0)
+                    {
+                        avg = (data[i][j] + data[i - 1][j] + data[i][j + 1] + data[i - 1][j + 1]) / 4.0;
+                    }
+                    else if (i == (rows - 1) && j == (cols - 1))
+                    {
+                        avg = (data[i][j] + data[i - 1][j] + data[i][j - 1] + data[i - 1][j - 1]) / 4.0;
+                    }
                 }
-                else if (i == 0 && j == (cols - 1))
+                //Edge Averages
+                else if (i == 0 || i == (rows - 1) || j == 0 || j == (cols - 1))
                 {
-                    avg = (data[i][j] + data[i + 1][j] + data[i][j - 1] + data[i + 1][j - 1]) / 4.0;
-                    cornerCount++;
+                    if (i == 0)
+                    {
+                        avg = (data[i][j - 1] + data[i][j] + data[i][j + 1] + data[i + 1][j - 1] + data[i + 1][j] + data[i + 1][j + 1]) / 6.0;
+                    }
+                    else if (i == (rows - 1))
+                    {
+                        avg = (data[i][j - 1] + data[i][j] + data[i][j + 1] + data[i - 1][j - 1] + data[i - 1][j] + data[i - 1][j + 1]) / 6.0;
+                    }
+                    else if (j == 0)
+                    {
+                        avg = (data[i - 1][j] + data[i][j] + data[i + 1][j] + data[i - 1][j + 1] + data[i][j + 1] + data[i + 1][j + 1]) / 6.0;
+                    }
+                    else if (j == (cols - 1))
+                    {
+                        avg = (data[i - 1][j] + data[i][j] + data[i + 1][j] + data[i - 1][j - 1] + data[i][j - 1] + data[i + 1][j - 1]) / 6.0;
+                    }
                 }
-                else if (i == (rows - 1) && j == 0)
+            #pragma omp critical {
+                if (avg >= largest)
                 {
-                    avg = (data[i][j] + data[i - 1][j] + data[i][j + 1] + data[i - 1][j + 1]) / 4.0;
-                    cornerCount++;
+                    largest = avg;
+                    largestI = i;
+                    largestJ = j;
                 }
-                else if (i == (rows - 1) && j == (cols - 1))
-                {
-                    avg = (data[i][j] + data[i - 1][j] + data[i][j - 1] + data[i - 1][j - 1]) / 4.0;
-                    cornerCount++;
-                }
-            }
-            //Edge Averages
-            else if (i == 0 || i == (rows - 1) || j == 0 || j == (cols - 1))
-            {
-                if (i == 0)
-                {
-                    avg = (data[i][j - 1] + data[i][j] + data[i][j + 1] + data[i + 1][j - 1] + data[i + 1][j] + data[i + 1][j + 1]) / 6.0;
-                    edgeCount++;
-                }
-                else if (i == (rows - 1))
-                {
-                    avg = (data[i][j - 1] + data[i][j] + data[i][j + 1] + data[i - 1][j - 1] + data[i - 1][j] + data[i - 1][j + 1]) / 6.0;
-                    edgeCount++;
-                }
-                else if (j == 0)
-                {
-                    avg = (data[i - 1][j] + data[i][j] + data[i + 1][j] + data[i - 1][j + 1] + data[i][j + 1] + data[i + 1][j + 1]) / 6.0;
-                    edgeCount++;
-                }
-                else if (j == (cols - 1))
-                {
-                    avg = (data[i - 1][j] + data[i][j] + data[i + 1][j] + data[i - 1][j - 1] + data[i][j - 1] + data[i + 1][j - 1]) / 6.0;
-                    edgeCount++;
-                }
-            }
-
-            if (avg >= largest)
-            {
-                largest = avg;
-                largestI = i;
-                largestJ = j;
             }
         }
     }
