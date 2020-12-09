@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
     S1.stop();
 
     // print out the max value here
-    cerr << "Largest avg is: " << largest << endl
-         << "found at (" << largestI << ", " << largestJ << ")" << endl;
+    cerr << "largest average: " << largest << endl
+         << "found at cells: (" << largestI << "," << largestJ << ")" << endl;
     cerr << "elapsed time: " << S1.getTime() << endl;
 }
